@@ -1,0 +1,72 @@
+---
+# Source: cp-schema-registry/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: poseidon-cp-schema-registry
+  namespace: poseidon-kafka-connect1
+  labels:
+    app: cp-schema-registry
+    chart: cp-schema-registry-0.1.0
+    release: poseidon
+    heritage: Helm
+spec:
+  ports:
+    - name: schema-registry
+      port: 8081
+  selector:
+    app: cp-schema-registry
+    release: poseidon
+---
+# Source: cp-schema-registry/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poseidon-cp-schema-registry
+  namespace: poseidon-kafka-connect1
+  labels:
+    app: cp-schema-registry
+    chart: cp-schema-registry-0.1.0
+    release: poseidon
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cp-schema-registry
+      release: poseidon
+  template:
+    metadata:
+      labels:
+        app: cp-schema-registry
+        release: poseidon
+    spec:
+      containers:
+        - name: cp-schema-registry-server
+          image: "confluentinc/cp-schema-registry:6.1.0"
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - name: schema-registry
+              containerPort: 8081
+              protocol: TCP
+          env:
+          - name: SCHEMA_REGISTRY_HOST_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: SCHEMA_REGISTRY_LISTENERS
+            value: http://0.0.0.0:8081
+          - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+            value: b-2.ti-dev-msk-env-5.0efip8.c9.kafka.us-east-1.amazonaws.com:9092,b-1.ti-dev-msk-env-5.0efip8.c9.kafka.us-east-1.amazonaws.com:9092
+          - name: SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID
+            value: poseidon
+          - name: SCHEMA_REGISTRY_MASTER_ELIGIBILITY
+            value: "true"
+          - name: SCHEMA_REGISTRY_HEAP_OPTS
+            value: "-Xms512M -Xmx512M"
+          
+          - name: JMX_PORT
+            value: "5555"
+      imagePullSecrets:
+        - name: poseidon-kafka-connect-operator-infobloxctokey
+      volumes:

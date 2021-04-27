@@ -1,0 +1,28 @@
+namespace: poseidon-kafka-connect1
+
+kafka:
+  bootstrapServers: "b-2.ti-dev-msk-env-5.0efip8.c9.kafka.us-east-1.amazonaws.com:9092,b-1.ti-dev-msk-env-5.0efip8.c9.kafka.us-east-1.amazonaws.com:9092"
+
+prometheus:
+  jmx:
+    enabled: false
+
+imagePullSecrets:
+  - name: poseidon-kafka-connect-operator-infobloxctokey
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+
+resources:
+  limits:
+   cpu: 100m
+   memory: 128Mi
+  requests:
+   cpu: 100m
+   memory: 128Mi

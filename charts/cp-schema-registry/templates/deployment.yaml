@@ -6,6 +6,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ template "cp-schema-registry.fullname" . }}
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ template "cp-schema-registry.name" . }}
     chart: {{ template "cp-schema-registry.chart" . }}
@@ -33,15 +34,13 @@ spec:
       {{- end }}
       {{- end }}
     spec:
-      securityContext:
-      {{- if .Values.securityContext }}
-{{ toYaml .Values.securityContext | indent 8 }}
-      {{- end}}
       containers:
         {{- if .Values.prometheus.jmx.enabled }}
         - name: prometheus-jmx-exporter
           image: "{{ .Values.prometheus.jmx.image }}:{{ .Values.prometheus.jmx.imageTag }}"
           imagePullPolicy: "{{ .Values.prometheus.jmx.imagePullPolicy }}"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           command:
           - java
           - -XX:+UnlockExperimentalVMOptions
